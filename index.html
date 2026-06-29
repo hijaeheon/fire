@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>119 출동 시뮬레이터</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pretendard", sans-serif; background: #0b1220; overflow: hidden; }
+
+  #map { position: absolute; inset: 0; }
+
+  /* ── 패널: PC는 좌측 고정 / 모바일은 하단 슬라이드 ── */
+  #panel {
+    position: absolute;
+    background: rgba(13, 20, 40, 0.96);
+    border: 1px solid #1e293b;
+    color: #e2e8f0;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 10;
+    overflow-y: auto;
+
+    /* PC 기본 */
+    top: 12px; left: 12px;
+    width: 300px;
+    max-height: calc(100% - 24px);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  /* 모바일: 하단 패널 */
+  @media (max-width: 640px) {
+    #panel {
+      top: auto; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      max-height: 55vh;
+      border-radius: 18px 18px 0 0;
+      padding: 14px 16px 20px;
+      border-left: none; border-right: none; border-bottom: none;
+    }
+    /* 모바일: 패널 위에 드래그 핸들 */
+    #panel::before {
+      content: '';
+      display: block;
+      width: 40px; height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      margin: 0 auto 12px;
+    }
+  }
+
+  #panel h1 {
+    font-size: 15px; font-weight: 700; color: #f8fafc;
+    margin-bottom: 3px;
+  }
+  #panel .sub {
+    font-size: 11px; color: #64748b; margin-bottom: 10px; line-height: 1.5;
+  }
+
+  /* ── 주소 검색 영역 ── */
+  #addrRow {
+    display: flex; gap: 6px; margin-bottom: 10px;
+  }
+  #addrInput {
+    flex: 1;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  #addrInput::placeholder { color: #475569; }
+  #addrInput:focus { border-color: #38bdf8; }
+  #addrBtn {
+    background: #1d4ed8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #addrBtn:active { background: #1e40af; }
+
+  /* 검색 결과 드롭다운 */
+  #addrDropdown {
+    display: none;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  #addrDropdown.open { display: block; }
+  #addrDropdown li {
+    list-style: none;
+    padding: 9px 12px;
+    font-size: 12px;
+    color: #cbd5e1;
+    border-bottom: 1px solid #1e293b;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #addrDropdown li:last-child { border-bottom: none; }
+  #addrDropdown li:active { background: #1e293b; }
+  #addrDropdown li strong { color: #38bdf8; font-size: 13px; display: block; }
+
+  #status {
+    font-size: 11px; color: #38bdf8; margin-bottom: 8px;
+    min-height: 15px; font-family: "Courier New", monospace;
+  }
+
+  #resultList { list-style: none; }
+  #resultList li {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 10px; border-radius: 8px;
+    background: #0f172a; margin-bottom: 5px; font-size: 13px;
+  }
+  #resultList li.error { color: #f87171; }
+  #resultList .rank {
+    font-family: "Courier New", monospace; font-size: 10px;
+    color: #64748b; width: 16px; flex-shrink: 0;
+  }
+  #resultList .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  #resultList .name { flex: 1; color: #e2e8f0; font-size: 12px; }
+  #resultList .time {
+    font-family: "Courier New", monospace; font-weight: 700;
+    color: #facc15; font-size: 13px;
+  }
+  #resultList .dist {
+    font-family: "Courier New", monospace; font-size: 11px; color: #64748b;
+  }
+
+  /* 지도 위 커스텀 오버레이 */
+  .station-label {
+    background: rgba(15,23,42,0.9); color: #e2e8f0;
+    font-size: 11px; padding: 3px 7px; border-radius: 6px;
+    white-space: nowrap; border: 1px solid #334155;
+    pointer-events: none;
+  }
+  .eta-badge {
+    color: #0b1220; font-size: 12px; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px;
+    white-space: nowrap; pointer-events: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    font-family: "Courier New", monospace;
+  }
+
+  /* 지도 위 힌트 */
+  #hint {
+    position: absolute; bottom: 58%; left: 50%; transform: translateX(-50%);
+    background: rgba(13,20,40,0.88); color: #94a3b8;
+    font-size: 12px; padding: 7px 15px; border-radius: 999px;
+    border: 1px solid #1e293b; z-index: 9; pointer-events: none;
+    white-space: nowrap;
+  }
+  @media (min-width: 641px) {
+    #hint { bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="hint">📍 지도 탭/클릭 = 화재 위치 지정</div>
+
+<div id="panel">
+  <h1>🚒 119 다중 출동 시뮬레이터</h1>
+  <div class="sub">주소 검색 또는 지도 탭으로 화재 위치를 지정하세요.</div>
+
+  <div id="addrRow">
+    <input id="addrInput" type="text" placeholder="주소 입력 (예: 양천구 신월동 123)" />
+    <button id="addrBtn">검색</button>
+  </div>
+  <ul id="addrDropdown"></ul>
+
+  <div id="status">화재 위치를 지정해주세요.</div>
+  <ol id="resultList"></ol>
+</div>
+
+<!-- ⚠️ 카카오 디벨로퍼스 JavaScript 키로 교체 -->
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ffc43362536e20c582bbe22378be755a&libraries=services"></script>
+<script>
+/* ====================================================
+   ⚠️ 설정값 — 이 블록만 본인 키/좌표로 교체하세요
+   ==================================================== */
+const TMAP_APP_KEY = "mXn8SFrurRawB92zNjiIy4r9t3v4Xc377El5jQPh";
+
+const fireStations = [
+  { name: "양천소방서",   lat: 37.5301485, lng: 126.8724253 },
+  { name: "신정119안전센터",   lat: 37.52170481, lng: 126.85089986 },
+  { name: "신트리119안전센터",   lat: 37.51061927, lng: 126.84813039 },
+  { name: "목동119안전센터",   lat: 37.54281541, lng: 126.88362649 },
+  { name: "신월119안전센터",   lat: 37.5278703, lng: 126.8330681 },
+  { name: "화곡119안전센터",   lat: 37.54361859, lng: 126.8452331 },
+  { name: "강서소방서",   lat: 37.5579782, lng: 126.8602313 },
+  { name: "신도림119안전센터",   lat: 37.5072903, lng: 126.8812306 },
+  { name: "당산119안전센터",   lat: 37.535454, lng: 126.899145 },
+  { name: "고척119안전센터",   lat: 37.50783262, lng: 126.8571956 },
+  // 필요한 만큼 계속 추가
+];
+
+const ROUTE_COLORS = ["#38bdf8","#facc15","#4ade80","#fb923c","#c084fc","#f472b6","#22d3ee","#a3e635"];
+/* ==================================================== */
+
+const map = new kakao.maps.Map(document.getElementById('map'), {
+  center: new kakao.maps.LatLng(fireStations[0].lat, fireStations[0].lng),
+  level: 7
+});
+
+// 안전센터 마커 + 라벨
+fireStations.forEach(st => {
+  const pos = new kakao.maps.LatLng(st.lat, st.lng);
+  const markerImg = new kakao.maps.MarkerImage(
+    'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
+    new kakao.maps.Size(28, 40)
+  );
+  new kakao.maps.Marker({ position: pos, map, image: markerImg });
+  new kakao.maps.CustomOverlay({
+    position: pos,
+    content: `<div class="station-label">🚒 ${st.name}</div>`,
+    yAnchor: 2.4, map
+  });
+});
+
+let fireOverlay = null;
+let routeOverlays = [];
+
+function clearRoutes() {
+  routeOverlays.forEach(o => { if (o.setMap) o.setMap(null); });
+  routeOverlays = [];
+}
+
+// ── 지도 클릭/탭 ──
+kakao.maps.event.addListener(map, 'click', e => {
+  const ll = e.latLng;
+  runSimulation(ll.getLat(), ll.getLng());
+  document.getElementById('addrDropdown').classList.remove('open');
+});
+
+// ── 주소 검색 (카카오 geocoder) ──
+const geocoder = new kakao.maps.services.Geocoder();
+
+function searchAddress() {
+  const q = document.getElementById('addrInput').value.trim();
+  if (!q) return;
+  geocoder.addressSearch(q, (result, status) => {
+    const dd = document.getElementById('addrDropdown');
+    dd.innerHTML = '';
+    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+      result.slice(0, 5).forEach(r => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${r.address_name}</strong>${r.road_address ? r.road_address.address_name : ''}`;
+        li.addEventListener('click', () => {
+          dd.classList.remove('open');
+          document.getElementById('addrInput').value = r.address_name;
+          runSimulation(parseFloat(r.y), parseFloat(r.x));
+        });
+        dd.appendChild(li);
+      });
+      dd.classList.add('open');
+    } else {
+      const li = document.createElement('li');
+      li.textContent = '검색 결과가 없습니다.';
+      dd.appendChild(li);
+      dd.classList.add('open');
+    }
+  });
+}
+
+document.getElementById('addrBtn').addEventListener('click', searchAddress);
+document.getElementById('addrInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchAddress();
+});
+
+// ── 시뮬레이션 ──
+async function runSimulation(fireLat, fireLng) {
+  clearRoutes();
+  const statusEl = document.getElementById('status');
+  const listEl = document.getElementById('resultList');
+  statusEl.textContent = `경로 계산 중… (${fireStations.length}곳 동시 조회)`;
+  listEl.innerHTML = '';
+
+  if (fireOverlay) fireOverlay.setMap(null);
+  fireOverlay = new kakao.maps.CustomOverlay({
+    position: new kakao.maps.LatLng(fireLat, fireLng),
+    content: `<div style="font-size:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))">🔥</div>`,
+    yAnchor: 1.0, map
+  });
+  map.panTo(new kakao.maps.LatLng(fireLat, fireLng));
+
+  const results = await Promise.all(
+    fireStations.map(st => getRoute(st, fireLat, fireLng))
+  );
+
+  results.sort((a, b) => {
+    if (a.success && b.success) return a.totalTime - b.totalTime;
+    return a.success ? -1 : 1;
+  });
+
+  results.forEach((r, rank) => {
+    const color = ROUTE_COLORS[rank % ROUTE_COLORS.length];
+    if (!r.success) {
+      appendRow(listEl, rank, r.station.name, null, null, color, r.error);
+      return;
+    }
+    const path = r.coords.map(c => new kakao.maps.LatLng(c[1], c[0]));
+    const poly = new kakao.maps.Polyline({
+      path, strokeWeight: 5, strokeColor: color,
+      strokeOpacity: 0.85, strokeStyle: 'solid'
+    });
+    poly.setMap(map);
+    routeOverlays.push(poly);
+
+    const min = Math.max(1, Math.round(r.totalTime / 60));
+    const km = (r.totalDistance / 1000).toFixed(1);
+
+    const badge = new kakao.maps.CustomOverlay({
+      position: new kakao.maps.LatLng(r.station.lat, r.station.lng),
+      content: `<div class="eta-badge" style="background:${color}">${min}분</div>`,
+      yAnchor: 3.4, map
+    });
+    routeOverlays.push(badge);
+    appendRow(listEl, rank, r.station.name, min, km, color, null);
+  });
+
+  statusEl.textContent = `🔥 화재 위치 설정 완료`;
+}
+
+async function getRoute(station, fireLat, fireLng) {
+  try {
+    const res = await fetch('https://apis.openapi.sk.com/tmap/routes?version=1&format=json', {
+      method: 'POST',
+      headers: { 'appKey': TMAP_APP_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        startX: String(station.lng), startY: String(station.lat),
+        endX: String(fireLng), endY: String(fireLat),
+        reqCoordType: 'WGS84GEO', resCoordType: 'WGS84GEO', searchOption: '0'
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    let coords = [], totalTime = 0, totalDistance = 0;
+    (data.features || []).forEach(f => {
+      if (f.geometry?.type === 'LineString') coords = coords.concat(f.geometry.coordinates);
+      if (f.properties?.totalTime > totalTime) totalTime = f.properties.totalTime;
+      if (f.properties?.totalDistance > totalDistance) totalDistance = f.properties.totalDistance;
+    });
+    if (!coords.length) throw new Error('경로 없음');
+    return { success: true, station, coords, totalTime, totalDistance };
+  } catch (err) {
+    return { success: false, station, error: err.message };
+  }
+}
+
+function appendRow(listEl, rank, name, min, km, color, error) {
+  const li = document.createElement('li');
+  if (error) {
+    li.classList.add('error');
+    li.innerHTML = `<span class="rank">${rank+1}</span><span class="dot" style="background:${color}"></span><span class="name">${name}</span><span class="dist">${error}</span>`;
+  } else {
+    li.innerHTML = `<span class="rank">${rank+1}</span><span class="dot" style="background:${color}"></span><span class="name">${name}</span><span class="time">${min}분</span><span class="dist">${km}km</span>`;
+  }
+  listEl.appendChild(li);
+}
+</script>
+</body>
+</html>
