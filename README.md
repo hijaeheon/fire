@@ -8,32 +8,30 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pretendard", sans-serif; background: #0b1220; overflow: hidden; }
 
-/* ── 하단 탭 네비 ── */
+/* ── 하단 탭 ── */
 #bottomNav {
   position: fixed; bottom: 0; left: 0; right: 0;
   height: 54px; background: rgba(10,17,35,0.98);
-  border-top: 1px solid #1e293b;
-  display: flex; z-index: 200;
+  border-top: 1px solid #1e293b; display: flex; z-index: 200;
 }
 .navBtn {
   flex: 1; background: none; border: none; color: #475569;
-  font-size: 11px; font-weight: 600; cursor: pointer;
+  font-size: 10px; font-weight: 600; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   -webkit-tap-highlight-color: transparent; transition: color 0.2s;
 }
-.navBtn .ico { font-size: 22px; line-height: 1; }
+.navBtn .ico { font-size: 20px; line-height: 1; }
 .navBtn.active { color: #38bdf8; }
 
 /* ── 페이지 ── */
 .page { position: fixed; inset: 0; bottom: 54px; display: none; }
 .page.active { display: block; }
-#page-map.active { display: flex; flex-direction: column; }
+#page-map.active, #page-radio.active { display: flex; flex-direction: column; }
 
-/* ══════════════════════════
+/* ══════════════════════════════
    PAGE 1 ─ 출동 시뮬레이터
-══════════════════════════ */
+══════════════════════════════ */
 #map { position: absolute; inset: 0; }
-
 #panel {
   position: absolute; background: rgba(13,20,40,0.95);
   border: 1px solid #1e293b; color: #e2e8f0;
@@ -47,24 +45,15 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
     border-radius: 18px 18px 0 0; padding: 14px 16px 16px;
     border-left: none; border-right: none; border-bottom: none;
   }
-  #panel::before {
-    content: ''; display: block; width: 40px; height: 4px;
-    background: #334155; border-radius: 2px; margin: 0 auto 10px;
-  }
+  #panel::before { content: ''; display: block; width: 40px; height: 4px; background: #334155; border-radius: 2px; margin: 0 auto 10px; }
 }
 #panel h1 { font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 3px; }
 #panel .sub { font-size: 11px; color: #64748b; margin-bottom: 10px; line-height: 1.5; }
 #addrRow { display: flex; gap: 6px; margin-bottom: 8px; }
-#addrInput {
-  flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 8px;
-  color: #e2e8f0; font-size: 13px; padding: 8px 10px; outline: none; -webkit-appearance: none;
-}
+#addrInput { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 13px; padding: 8px 10px; outline: none; -webkit-appearance: none; }
 #addrInput::placeholder { color: #475569; }
 #addrInput:focus { border-color: #38bdf8; }
-#addrBtn {
-  background: #1d4ed8; color: #fff; border: none; border-radius: 8px;
-  font-size: 13px; font-weight: 600; padding: 8px 12px; cursor: pointer; white-space: nowrap;
-}
+#addrBtn { background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; padding: 8px 12px; cursor: pointer; white-space: nowrap; }
 #addrDropdown { display: none; background: #0f172a; border: 1px solid #334155; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
 #addrDropdown.open { display: block; }
 #addrDropdown li { list-style: none; padding: 9px 12px; font-size: 12px; color: #cbd5e1; border-bottom: 1px solid #1e293b; cursor: pointer; }
@@ -72,7 +61,7 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
 #addrDropdown li strong { color: #38bdf8; font-size: 13px; display: block; }
 #status { font-size: 11px; color: #38bdf8; margin-bottom: 8px; min-height: 15px; font-family: monospace; }
 #resultList { list-style: none; }
-#resultList li { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 8px; background: #0f172a; margin-bottom: 5px; font-size: 13px; }
+#resultList li { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 8px; background: #0f172a; margin-bottom: 5px; }
 #resultList .rank { font-family: monospace; font-size: 10px; color: #64748b; width: 16px; flex-shrink: 0; }
 #resultList .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 #resultList .name { flex: 1; color: #e2e8f0; font-size: 12px; }
@@ -84,131 +73,137 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
 #hint { position: absolute; bottom: calc(52% + 8px); left: 50%; transform: translateX(-50%); background: rgba(13,20,40,.88); color: #94a3b8; font-size: 12px; padding: 7px 15px; border-radius: 999px; border: 1px solid #1e293b; z-index: 9; pointer-events: none; white-space: nowrap; }
 @media (min-width: 641px) { #hint { bottom: 16px; } }
 
-/* ══════════════════════════
-   PAGE 2 ─ 소방작전도
-══════════════════════════ */
-#mapHeader {
-  padding: 10px 12px 8px;
-  background: rgba(13,20,40,0.97);
-  border-bottom: 1px solid #1e293b;
-  flex-shrink: 0;
+/* ══════════════════════════════
+   PAGE 2 ─ 무전 멘트
+══════════════════════════════ */
+#radioHeader {
+  padding: 12px 14px 8px; background: rgba(13,20,40,0.97);
+  border-bottom: 1px solid #1e293b; flex-shrink: 0;
 }
-#floorControls {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+#radioHeader h2 { font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 2px; }
+#radioHeader p { font-size: 11px; color: #64748b; }
+#radioHeaderBtns { display: flex; gap: 6px; margin-top: 8px; }
+.hdr-btn {
+  padding: 6px 12px; border-radius: 7px; border: none;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+#addCatBtn { background: #065f46; color: #fff; }
+#resetScriptBtn { background: #1e293b; color: #94a3b8; }
+
+#radioBody { flex: 1; overflow-y: auto; padding: 10px 12px 16px; }
+
+/* 카테고리 블록 */
+.cat-block { margin-bottom: 10px; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; }
+.cat-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 12px; background: #111827; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.cat-arrow { font-size: 12px; color: #64748b; transition: transform 0.2s; flex-shrink: 0; }
+.cat-block.collapsed .cat-arrow { transform: rotate(-90deg); }
+.cat-title { flex: 1; font-size: 13px; font-weight: 700; color: #e2e8f0; }
+.cat-edit-btn { font-size: 14px; padding: 2px 4px; background: none; border: none; cursor: pointer; color: #64748b; -webkit-tap-highlight-color: transparent; }
+.cat-del-btn { font-size: 14px; padding: 2px 4px; background: none; border: none; cursor: pointer; color: #ef4444; -webkit-tap-highlight-color: transparent; }
+.cat-add-btn { font-size: 12px; padding: 2px 8px; background: #1e3a5f; color: #38bdf8; border: none; border-radius: 5px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+.cat-items { background: #0d1929; }
+.cat-block.collapsed .cat-items { display: none; }
+
+/* 멘트 아이템 */
+.script-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 12px; border-bottom: 1px solid #1a2740;
+}
+.script-item:last-child { border-bottom: none; }
+.script-text { flex: 1; font-size: 13px; color: #cbd5e1; line-height: 1.6; word-break: keep-all; }
+.item-btns { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.copy-btn { background: #1e3a5f; color: #38bdf8; border: none; border-radius: 5px; font-size: 11px; padding: 4px 7px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.copy-btn:active { background: #1d4ed8; }
+.edit-btn { background: #1a2e1a; color: #4ade80; border: none; border-radius: 5px; font-size: 11px; padding: 4px 7px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.del-btn { background: #2d1515; color: #f87171; border: none; border-radius: 5px; font-size: 11px; padding: 4px 7px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+/* 인라인 편집 */
+.edit-area { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; padding: 6px 8px; outline: none; resize: vertical; font-family: inherit; line-height: 1.6; min-height: 60px; }
+.edit-area:focus { border-color: #38bdf8; }
+.edit-save-btn { background: #1d4ed8; color: #fff; border: none; border-radius: 5px; font-size: 11px; padding: 4px 8px; cursor: pointer; margin-right: 4px; }
+.edit-cancel-btn { background: #1e293b; color: #94a3b8; border: none; border-radius: 5px; font-size: 11px; padding: 4px 8px; cursor: pointer; }
+
+/* 카테고리 이름 편집 */
+.cat-title-input { flex: 1; background: #0f172a; border: 1px solid #38bdf8; border-radius: 5px; color: #e2e8f0; font-size: 13px; font-weight: 700; padding: 2px 7px; outline: none; }
+
+/* 토스트 */
+#toast {
+  position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+  background: #4ade80; color: #0b1220; font-size: 13px; font-weight: 700;
+  padding: 8px 20px; border-radius: 999px; z-index: 999;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap;
+}
+#toast.show { opacity: 1; }
+
+/* 모달 (카테고리/아이템 추가) */
+#modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+#modal-box {
+  background: #111827; border: 1px solid #334155; border-radius: 14px;
+  padding: 20px; width: calc(100% - 40px); max-width: 380px;
+}
+#modal-box h3 { color: #f8fafc; font-size: 15px; margin-bottom: 12px; }
+#modal-input {
+  width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+  color: #e2e8f0; font-size: 14px; padding: 10px 12px; outline: none;
+  resize: vertical; min-height: 48px; font-family: inherit; line-height: 1.6;
+}
+#modal-input:focus { border-color: #38bdf8; }
+.modal-btns { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+.modal-ok { background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; padding: 8px 18px; cursor: pointer; }
+.modal-cancel { background: #1e293b; color: #94a3b8; border: none; border-radius: 8px; font-size: 13px; padding: 8px 14px; cursor: pointer; }
+
+/* ══════════════════════════════
+   PAGE 3 ─ 소방작전도
+══════════════════════════════ */
+#mapHeader { padding: 10px 12px 8px; background: rgba(13,20,40,0.97); border-bottom: 1px solid #1e293b; flex-shrink: 0; }
+#floorControls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 #floorControls label { color: #e2e8f0; font-size: 13px; display: flex; align-items: center; gap: 4px; }
-.num-input {
-  width: 50px; background: #0f172a; border: 1px solid #334155; border-radius: 6px;
-  color: #e2e8f0; font-size: 14px; padding: 5px 4px; text-align: center; outline: none;
-}
-#buildBtn {
-  background: #dc2626; color: #fff; border: none; border-radius: 8px;
-  font-size: 13px; font-weight: 700; padding: 6px 14px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-#buildBtn:active { background: #b91c1c; }
+.num-input { width: 50px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; padding: 5px 4px; text-align: center; outline: none; }
+#buildBtn { background: #dc2626; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; padding: 6px 14px; cursor: pointer; }
 #customUnitRow { display: flex; gap: 6px; }
-#customUnitInput {
-  flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 6px;
-  color: #e2e8f0; font-size: 12px; padding: 6px 8px; outline: none;
-}
+#customUnitInput { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 12px; padding: 6px 8px; outline: none; }
 #customUnitInput::placeholder { color: #475569; }
-#customUnitInput:focus { border-color: #4ade80; }
-#addUnitBtn {
-  background: #065f46; color: #fff; border: none; border-radius: 6px;
-  font-size: 12px; font-weight: 700; padding: 6px 12px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* 메인 영역 */
+#addUnitBtn { background: #065f46; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; padding: 6px 12px; cursor: pointer; }
 #mapMain { flex: 1; display: flex; overflow: hidden; }
-
-/* 건물 */
-#buildingArea {
-  width: 48%; overflow-y: auto; padding: 8px 6px 8px 8px;
-  border-right: 1px solid #1e293b;
-}
+#buildingArea { width: 48%; overflow-y: auto; padding: 8px 6px 8px 8px; border-right: 1px solid #1e293b; }
 #noBuildingMsg { color: #475569; font-size: 12px; text-align: center; margin-top: 30px; line-height: 1.8; }
-
-.floor-zone {
-  display: flex; align-items: stretch;
-  min-height: 46px; margin-bottom: 2px; border-radius: 6px;
-  border: 1.5px solid #1e293b; overflow: hidden;
-  transition: border-color 0.12s, background 0.12s;
-}
+.floor-zone { display: flex; align-items: stretch; min-height: 46px; margin-bottom: 2px; border-radius: 6px; border: 1.5px solid #1e293b; overflow: hidden; transition: border-color 0.12s; }
 .floor-zone.ground { background: #0f1f35; }
 .floor-zone.basement { background: #0a1520; }
 .floor-zone.roof { background: #1a0a2e; border-color: #7c3aed; min-height: 34px; }
 .floor-zone.drag-over { border-color: #38bdf8 !important; background: rgba(56,189,248,0.1) !important; }
-
-.floor-label {
-  width: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; font-family: monospace;
-  background: #1e293b; color: #94a3b8;
-}
+.floor-label { width: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; font-family: monospace; background: #1e293b; color: #94a3b8; }
 .floor-zone.basement .floor-label { background: #162032; color: #64748b; }
 .floor-zone.roof .floor-label { background: #2d1b69; color: #c4b5fd; }
-
-.floor-content {
-  flex: 1; display: flex; flex-wrap: wrap; align-items: center;
-  gap: 3px; padding: 4px 5px; min-height: 46px;
-}
+.floor-content { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 3px; padding: 4px 5px; min-height: 46px; }
 .floor-zone.roof .floor-content { min-height: 34px; }
-
-.placed-chip {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 2px 7px 2px 8px; border-radius: 999px;
-  font-size: 10px; font-weight: 700; color: #0b1220;
-  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-  white-space: nowrap;
-}
-.placed-chip .remove-x { font-size: 11px; opacity: 0.7; margin-left: 1px; }
-
-/* 출동대 패널 */
+.placed-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; color: #0b1220; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+.placed-chip .remove-x { font-size: 11px; opacity: 0.7; }
 #unitPanel { width: 52%; overflow-y: auto; padding: 8px; }
-.unit-section-label {
-  font-size: 10px; color: #64748b; font-weight: 700;
-  letter-spacing: 0.06em; padding: 2px 2px 5px; display: block;
-}
+.unit-section-label { font-size: 10px; color: #64748b; font-weight: 700; letter-spacing: 0.06em; padding: 2px 2px 5px; display: block; }
 #unitGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 8px; }
-
-.unit-icon {
-  background: #111827; border: 1.5px solid #1e293b;
-  border-radius: 9px; padding: 7px 4px; text-align: center;
-  font-size: 10px; font-weight: 700; color: #e2e8f0;
-  cursor: grab; user-select: none; touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.2s, border-color 0.2s;
-  line-height: 1.3; position: relative;
-}
+.unit-icon { background: #111827; border: 1.5px solid #1e293b; border-radius: 9px; padding: 7px 4px; text-align: center; font-size: 10px; font-weight: 700; color: #e2e8f0; cursor: grab; user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; transition: opacity 0.2s; line-height: 1.3; }
 .unit-icon .u-emoji { font-size: 18px; display: block; margin-bottom: 2px; }
-.unit-icon .u-name { display: block; word-break: keep-all; }
 .unit-icon.placed { opacity: 0.3; cursor: default; }
-.unit-icon.custom { border-color: #4ade80; }
-
-/* 드래그 고스트 */
-#dragGhost {
-  position: fixed; pointer-events: none; z-index: 9999;
-  background: #1e3a5f; border: 2px solid #38bdf8; border-radius: 9px;
-  padding: 7px 4px; text-align: center; font-size: 10px; font-weight: 700; color: #e2e8f0;
-  width: 75px; opacity: 0.92; display: none;
-  box-shadow: 0 6px 20px rgba(0,0,0,.5); transform: scale(1.08);
-  line-height: 1.3;
-}
+.unit-icon.custom { border-color: #4ade80 !important; }
+#dragGhost { position: fixed; pointer-events: none; z-index: 9999; background: #1e3a5f; border: 2px solid #38bdf8; border-radius: 9px; padding: 7px 4px; text-align: center; font-size: 10px; font-weight: 700; color: #e2e8f0; width: 75px; opacity: 0.92; display: none; box-shadow: 0 6px 20px rgba(0,0,0,.5); line-height: 1.3; }
 #dragGhost .u-emoji { font-size: 18px; display: block; margin-bottom: 2px; }
-
-.reset-btn {
-  width: 100%; margin-top: 6px; padding: 7px;
-  background: #1e293b; border: 1px solid #334155; border-radius: 8px;
-  color: #94a3b8; font-size: 12px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.reset-btn:active { background: #0f172a; }
+.reset-btn { width: 100%; margin-top: 6px; padding: 7px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #94a3b8; font-size: 12px; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<!-- ══ PAGE 1: 출동 시뮬레이터 ══ -->
+<!-- PAGE 1: 출동 시뮬레이터 -->
 <div id="page-sim" class="page active">
   <div id="map"></div>
   <div id="hint">📍 지도 탭/클릭 = 화재 위치 지정</div>
@@ -225,7 +220,20 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
   </div>
 </div>
 
-<!-- ══ PAGE 2: 소방작전도 ══ -->
+<!-- PAGE 2: 무전 멘트 -->
+<div id="page-radio" class="page">
+  <div id="radioHeader">
+    <h2>📻 무전 멘트</h2>
+    <p>항목을 탭하면 복사 · ✏️ 수정 · 🗑️ 삭제 가능</p>
+    <div id="radioHeaderBtns">
+      <button class="hdr-btn" id="addCatBtn">＋ 카테고리 추가</button>
+      <button class="hdr-btn" id="resetScriptBtn">🔄 기본값 초기화</button>
+    </div>
+  </div>
+  <div id="radioBody"></div>
+</div>
+
+<!-- PAGE 3: 소방작전도 -->
 <div id="page-map" class="page">
   <div id="mapHeader">
     <div id="floorControls">
@@ -238,7 +246,6 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
       <button id="addUnitBtn">➕ 추가</button>
     </div>
   </div>
-
   <div id="mapMain">
     <div id="buildingArea">
       <div id="noBuildingMsg">⬆️ 층수를 입력하고<br>건물 생성을 누르세요</div>
@@ -254,31 +261,46 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
 <!-- 드래그 고스트 -->
 <div id="dragGhost"><span class="u-emoji">🚒</span><span class="u-name"></span></div>
 
-<!-- 하단 탭 네비 -->
-<div id="bottomNav">
-  <button class="navBtn active" onclick="showPage('sim')">
-    <span class="ico">🚒</span>출동예측
-  </button>
-  <button class="navBtn" onclick="showPage('map')">
-    <span class="ico">🗺️</span>작전도
-  </button>
+<!-- 토스트 -->
+<div id="toast">📋 복사됨!</div>
+
+<!-- 모달 -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h3 id="modal-title">추가</h3>
+    <textarea id="modal-input" rows="3" placeholder="내용 입력"></textarea>
+    <div class="modal-btns">
+      <button class="modal-cancel" id="modal-cancel-btn">취소</button>
+      <button class="modal-ok" id="modal-ok-btn">확인</button>
+    </div>
+  </div>
 </div>
 
-<!-- ⚠️ 카카오 JavaScript 키로 교체 -->
-<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_JS_KEY&libraries=services"></script>
+<!-- 하단 탭 -->
+<div id="bottomNav">
+  <button class="navBtn active" onclick="showPage('sim')"><span class="ico">🚒</span>출동예측</button>
+  <button class="navBtn" onclick="showPage('radio')"><span class="ico">📻</span>무전멘트</button>
+  <button class="navBtn" onclick="showPage('map')"><span class="ico">🗺️</span>작전도</button>
+</div>
+
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ffc43362536e20c582bbe22378be755a&libraries=services"></script>
 <script>
 /* ================================================
-   ⚠️ 설정값 — 본인 키/좌표로 교체
+   설정값
    ================================================ */
-const TMAP_APP_KEY = "YOUR_TMAP_APP_KEY";
-
+const TMAP_APP_KEY = "mXn8SFrurRawB92zNjiIy4r9t3v4Xc377El5jQPh";
 const fireStations = [
-  { name: "양천소방서",      lat: 37.5270, lng: 126.8554 },
-  { name: "신정안전센터",    lat: 37.0000, lng: 127.0000 }, // ⚠️ 실제 좌표로 교체
-  { name: "목동안전센터",    lat: 37.0000, lng: 127.0000 },
-  { name: "신월안전센터",    lat: 37.0000, lng: 127.0000 },
+  { name: "양천소방서",   lat: 37.5301485, lng: 126.8724253 },
+  { name: "신정119안전센터",   lat: 37.52170481, lng: 126.85089986 },
+  { name: "신트리119안전센터",   lat: 37.51061927, lng: 126.84813039 },
+  { name: "목동119안전센터",   lat: 37.54281541, lng: 126.88362649 },
+  { name: "신월119안전센터",   lat: 37.5278703, lng: 126.8330681 },
+  { name: "화곡119안전센터",   lat: 37.54361859, lng: 126.8452331 },
+  { name: "강서소방서",   lat: 37.5579782, lng: 126.8602313 },
+  { name: "신도림119안전센터",   lat: 37.5072903, lng: 126.8812306 },
+  { name: "당산119안전센터",   lat: 37.535454, lng: 126.899145 },
+  { name: "고척119안전센터",   lat: 37.50783262, lng: 126.8571956 },
 ];
-
 const ROUTE_COLORS = ["#38bdf8","#facc15","#4ade80","#fb923c","#c084fc","#f472b6","#22d3ee","#a3e635"];
 
 /* ================================================
@@ -291,15 +313,10 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.navBtn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.navBtn')[id === 'sim' ? 0 : 1].classList.add('active');
-
-  if (id === 'sim' && !mapInitialized) {
-    initKakaoMap();
-    mapInitialized = true;
-  }
-  if (id === 'sim' && kakaoMap) {
-    setTimeout(() => kakaoMap.relayout(), 50);
-  }
+  const idx = {sim:0, radio:1, map:2}[id];
+  document.querySelectorAll('.navBtn')[idx].classList.add('active');
+  if (id === 'sim' && !mapInitialized) { initKakaoMap(); mapInitialized = true; }
+  if (id === 'sim' && kakaoMap) setTimeout(() => kakaoMap.relayout(), 50);
 }
 
 /* ================================================
@@ -307,22 +324,14 @@ function showPage(id) {
    ================================================ */
 function initKakaoMap() {
   kakaoMap = new kakao.maps.Map(document.getElementById('map'), {
-    center: new kakao.maps.LatLng(fireStations[0].lat, fireStations[0].lng),
-    level: 7
+    center: new kakao.maps.LatLng(fireStations[0].lat, fireStations[0].lng), level: 7
   });
-
   fireStations.forEach(st => {
     const pos = new kakao.maps.LatLng(st.lat, st.lng);
     new kakao.maps.Marker({ position: pos, map: kakaoMap });
-    new kakao.maps.CustomOverlay({
-      position: pos,
-      content: `<div class="station-label">🚒 ${st.name}</div>`,
-      yAnchor: 2.4, map: kakaoMap
-    });
+    new kakao.maps.CustomOverlay({ position: pos, content: '<div class="station-label">🚒 ' + st.name + '</div>', yAnchor: 2.4, map: kakaoMap });
   });
-
   const geocoder = new kakao.maps.services.Geocoder();
-
   function searchAddress() {
     const q = document.getElementById('addrInput').value.trim();
     if (!q) return;
@@ -332,363 +341,422 @@ function initKakaoMap() {
       if (status === kakao.maps.services.Status.OK && result.length) {
         result.slice(0, 5).forEach(r => {
           const li = document.createElement('li');
-          li.innerHTML = `<strong>${r.address_name}</strong>${r.road_address ? r.road_address.address_name : ''}`;
-          li.addEventListener('click', () => {
-            dd.classList.remove('open');
-            document.getElementById('addrInput').value = r.address_name;
-            runSimulation(parseFloat(r.y), parseFloat(r.x));
-          });
+          li.innerHTML = '<strong>' + r.address_name + '</strong>' + (r.road_address ? r.road_address.address_name : '');
+          li.addEventListener('click', () => { dd.classList.remove('open'); document.getElementById('addrInput').value = r.address_name; runSimulation(parseFloat(r.y), parseFloat(r.x)); });
           dd.appendChild(li);
         });
         dd.classList.add('open');
       } else {
-        const li = document.createElement('li');
-        li.textContent = '검색 결과가 없습니다.';
-        dd.appendChild(li);
-        dd.classList.add('open');
+        const li = document.createElement('li'); li.textContent = '검색 결과가 없습니다.'; dd.appendChild(li); dd.classList.add('open');
       }
     });
   }
-
   document.getElementById('addrBtn').addEventListener('click', searchAddress);
   document.getElementById('addrInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchAddress(); });
-  kakao.maps.event.addListener(kakaoMap, 'click', e => {
-    runSimulation(e.latLng.getLat(), e.latLng.getLng());
-    document.getElementById('addrDropdown').classList.remove('open');
-  });
+  kakao.maps.event.addListener(kakaoMap, 'click', e => { runSimulation(e.latLng.getLat(), e.latLng.getLng()); document.getElementById('addrDropdown').classList.remove('open'); });
 }
 
-let fireOverlay = null;
-let routeOverlays = [];
-
-function clearRoutes() {
-  routeOverlays.forEach(o => { if (o.setMap) o.setMap(null); });
-  routeOverlays = [];
-}
+let fireOverlay = null, routeOverlays = [];
+function clearRoutes() { routeOverlays.forEach(o => { if (o.setMap) o.setMap(null); }); routeOverlays = []; }
 
 async function runSimulation(fireLat, fireLng) {
   clearRoutes();
-  const statusEl = document.getElementById('status');
-  const listEl = document.getElementById('resultList');
-  statusEl.textContent = `경로 계산 중… (${fireStations.length}곳)`;
+  const statusEl = document.getElementById('status'), listEl = document.getElementById('resultList');
+  statusEl.textContent = '경로 계산 중… (' + fireStations.length + '곳)';
   listEl.innerHTML = '';
-
   if (fireOverlay) fireOverlay.setMap(null);
-  fireOverlay = new kakao.maps.CustomOverlay({
-    position: new kakao.maps.LatLng(fireLat, fireLng),
-    content: `<div style="font-size:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))">🔥</div>`,
-    yAnchor: 1.0, map: kakaoMap
-  });
+  fireOverlay = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(fireLat, fireLng), content: '<div style="font-size:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))">🔥</div>', yAnchor: 1.0, map: kakaoMap });
   kakaoMap.panTo(new kakao.maps.LatLng(fireLat, fireLng));
-
   const results = await Promise.all(fireStations.map(st => getRoute(st, fireLat, fireLng)));
-  results.sort((a, b) => {
-    if (a.success && b.success) return a.totalTime - b.totalTime;
-    return a.success ? -1 : 1;
-  });
-
+  results.sort((a, b) => { if (a.success && b.success) return a.totalTime - b.totalTime; return a.success ? -1 : 1; });
   results.forEach((r, rank) => {
     const color = ROUTE_COLORS[rank % ROUTE_COLORS.length];
     if (!r.success) { appendRow(listEl, rank, r.station.name, null, null, color, r.error); return; }
-    const poly = new kakao.maps.Polyline({
-      path: r.coords.map(c => new kakao.maps.LatLng(c[1], c[0])),
-      strokeWeight: 5, strokeColor: color, strokeOpacity: 0.85, strokeStyle: 'solid'
-    });
-    poly.setMap(kakaoMap);
-    routeOverlays.push(poly);
-    const min = Math.max(1, Math.round(r.totalTime / 60));
-    const km = (r.totalDistance / 1000).toFixed(1);
-    const badge = new kakao.maps.CustomOverlay({
-      position: new kakao.maps.LatLng(r.station.lat, r.station.lng),
-      content: `<div class="eta-badge" style="background:${color}">${min}분</div>`,
-      yAnchor: 3.4, map: kakaoMap
-    });
+    const poly = new kakao.maps.Polyline({ path: r.coords.map(c => new kakao.maps.LatLng(c[1], c[0])), strokeWeight: 5, strokeColor: color, strokeOpacity: 0.85, strokeStyle: 'solid' });
+    poly.setMap(kakaoMap); routeOverlays.push(poly);
+    const min = Math.max(1, Math.round(r.totalTime / 60)), km = (r.totalDistance / 1000).toFixed(1);
+    const badge = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(r.station.lat, r.station.lng), content: '<div class="eta-badge" style="background:' + color + '">' + min + '분</div>', yAnchor: 3.4, map: kakaoMap });
     routeOverlays.push(badge);
     appendRow(listEl, rank, r.station.name, min, km, color, null);
   });
-  statusEl.textContent = `🔥 화재 위치 설정 완료`;
+  statusEl.textContent = '🔥 화재 위치 설정 완료';
 }
 
 async function getRoute(station, fireLat, fireLng) {
   try {
     const res = await fetch('https://apis.openapi.sk.com/tmap/routes?version=1&format=json', {
-      method: 'POST',
-      headers: { 'appKey': TMAP_APP_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        startX: String(station.lng), startY: String(station.lat),
-        endX: String(fireLng), endY: String(fireLat),
-        reqCoordType: 'WGS84GEO', resCoordType: 'WGS84GEO', searchOption: '0'
-      })
+      method: 'POST', headers: { 'appKey': TMAP_APP_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ startX: String(station.lng), startY: String(station.lat), endX: String(fireLng), endY: String(fireLat), reqCoordType: 'WGS84GEO', resCoordType: 'WGS84GEO', searchOption: '0' })
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     let coords = [], totalTime = 0, totalDistance = 0;
     (data.features || []).forEach(f => {
-      if (f.geometry?.type === 'LineString') coords = coords.concat(f.geometry.coordinates);
-      if (f.properties?.totalTime > totalTime) totalTime = f.properties.totalTime;
-      if (f.properties?.totalDistance > totalDistance) totalDistance = f.properties.totalDistance;
+      if (f.geometry && f.geometry.type === 'LineString') coords = coords.concat(f.geometry.coordinates);
+      if (f.properties && f.properties.totalTime > totalTime) totalTime = f.properties.totalTime;
+      if (f.properties && f.properties.totalDistance > totalDistance) totalDistance = f.properties.totalDistance;
     });
     if (!coords.length) throw new Error('경로 없음');
     return { success: true, station, coords, totalTime, totalDistance };
-  } catch (err) {
-    return { success: false, station, error: err.message };
-  }
+  } catch (err) { return { success: false, station, error: err.message }; }
 }
 
 function appendRow(listEl, rank, name, min, km, color, error) {
   const li = document.createElement('li');
   if (error) {
     li.classList.add('error');
-    li.innerHTML = `<span class="rank">${rank+1}</span><span class="dot" style="background:${color}"></span><span class="name">${name}</span><span class="dist">${error}</span>`;
+    li.innerHTML = '<span class="rank">' + (rank+1) + '</span><span class="dot" style="background:' + color + '"></span><span class="name">' + name + '</span><span class="dist">' + error + '</span>';
   } else {
-    li.innerHTML = `<span class="rank">${rank+1}</span><span class="dot" style="background:${color}"></span><span class="name">${name}</span><span class="time">${min}분</span><span class="dist">${km}km</span>`;
+    li.innerHTML = '<span class="rank">' + (rank+1) + '</span><span class="dot" style="background:' + color + '"></span><span class="name">' + name + '</span><span class="time">' + min + '분</span><span class="dist">' + km + 'km</span>';
   }
   listEl.appendChild(li);
 }
 
 /* ================================================
-   PAGE 2: 소방작전도
+   PAGE 2: 무전 멘트
    ================================================ */
-const DEFAULT_UNITS = [
-  { name: "양천대",      emoji: "🚒" },
-  { name: "신정대",      emoji: "🚒" },
-  { name: "신트리대",    emoji: "🚒" },
-  { name: "신월대",      emoji: "🚒" },
-  { name: "목동대",      emoji: "🚒" },
-  { name: "양천구조대",  emoji: "🦺" },
-  { name: "강서구조대",  emoji: "🦺" },
-  { name: "구로구조대",  emoji: "🦺" },
-  { name: "영등포구조대",emoji: "🦺" },
-  { name: "등촌대",      emoji: "🚒" },
-  { name: "화곡대",      emoji: "🚒" },
-  { name: "당산대",      emoji: "🚒" },
-  { name: "신도림대",    emoji: "🚒" },
-  { name: "고척대",      emoji: "🚒" },
+const LS_KEY = 'fireRadioScripts_v1';
+
+const DEFAULT_SCRIPTS = [
+  { id: 1, category: '신고내용 전달', items: [
+    { id: 101, text: '양천열에서 출동 각대에 전파합니다. 신고 내용은 ○○건물 ○층에서 연기 발생 중' }
+  ]},
+  { id: 2, category: '선착대 지정', items: [
+    { id: 201, text: '선착대는 ○○대, ○○대는 신속히 달하나 해서 보이는 상황 속보, 소방력 판단' },
+    { id: 202, text: '선착대 ○○대는 비착 즉시 상황판단하고, 화재진압작전 필요 여부 판단. 후착대 임무부여 할 수 있도록' }
+  ]},
+  { id: 3, category: '임무부여', items: [
+    { id: 301, text: '열에서 다시한번 전파 합니다. ○○대는 화점층 진입하여 화재진압, ○○대는 화점층으로 화재진압 및 인명구조, 구조대는 화점층 인명구조' }
+  ]},
+  { id: 4, category: '유관기관 요청', items: [
+    { id: 401, text: '센터상황실 여기 양천열. 구청, 경인, 가스, 한전 비발조치' }
+  ]},
+  { id: 5, category: '소방안전지도 전파', items: [
+    { id: 501, text: '양천상황실은 소방안전지도 전파할 것' }
+  ]},
+  { id: 6, category: '채널변경', items: [
+    { id: 601, text: '강서구 목동 구조출동 차량은 양천 화재비상, (UHF 채널 12번)으로 채널 변경하세요.' }
+  ]},
+  { id: 7, category: '선착대 도착', items: [
+    { id: 701, text: '열 여기 ○○대인데 현장도착했는데 보이는 상황은 (무전 안나오면 유도할 것)' }
+  ]},
+  { id: 8, category: '임시의료소', items: [
+    { id: 801, text: '○○구급은 안전구역에 임시의료소 설치하고 사상자 관리토록' },
+    { id: 802, text: '○○구급은 비착하면 안전구역에 임시의료소 설치하고 ○○구급 대장이 임시의료소장으로 구급지휘할 수 있도록' }
+  ]},
+  { id: 9, category: '현장도착', items: [
+    { id: 901, text: '센터상황실 양천열 사팔 비착 활동개시' }
+  ]},
+  { id: 10, category: '활동단계', items: [
+    { id: 1001, text: '다섯 여기 열, 현재 비발대 진압대 4개대 백 2개대' },
+    { id: 1002, text: '열여섯 여기열, 각 층별 거주자 인원 알려주세요' },
+    { id: 1003, text: '3층 건물 중 화점층 몇층인지? 총 6층 건물이죠?' },
+    { id: 1004, text: '1층 거주자, 2층 거주자 인원 확인되나요?' },
+    { id: 1005, text: '열에서 알립니다. 현장에 있는 직원들은 A면 다섯 앞으로.' },
+    { id: 1006, text: '비발 각대 전대원, 다섯 앞으로 집결' },
+    { id: 1007, text: '공기통 30개 비착되어 있으니 교체 필요한 대원들 교체토록' }
+  ]},
+  { id: 11, category: '대응단계 발령', items: [
+    { id: 1101, text: '센터상황실 여기 양천열 2034 대응1단발령' },
+    { id: 1102, text: '양천상황실은 대응1단계 발령에 따른 유관기관 조치바람' },
+    { id: 1103, text: '센터상황실 여기 양천열 진압 4개대, 구조는 특수 포함 4개대, 구급 4개대, 소방력 추가 요청하고 다수사상자 예상되니 보건소 신속대응반, DMAT가동, 다수사상자 관리시스템 활성화 요청합니다.' },
+    { id: 1104, text: '자원대기소는 서울에너지공사 주차장으로 지정하니 후착 비발대는 자원대기소로 집결할 수 있도록 안내하기 바람' },
+    { id: 1105, text: '열에서 전달합니다. 긴급구조통제단 (보건소)현장응급의료소가 가동되었으니 지금부터 발생한 모든 사상자는 A면 현장응급의료소로 인계하기 바라며, 구급대원은 사상자 이송 후 인적사항 SNS로 전송하기 바랍니다.(응급의료소 전환운영)' },
+    { id: 1106, text: '다섯 여기 열인데 화생방대대 비착해서 임무대기중' },
+    { id: 1107, text: '다섯 여기 열, 예비공기통 50개 도착해서 현장지휘소 옆에 보관중' },
+    { id: 1108, text: '긴급구조통제단 여기 열. ○○대원 1명 고립된 것으로 추정되어 특구단 RIT가 진입할 예정이니 참고 바람 (대응계획부장 사칠)' }
+  ]},
+  { id: 12, category: '초진', items: [
+    { id: 1201, text: '다섯, 아직 초진 안나왔습니다.' },
+    { id: 1202, text: '현재 시 초진 1936, ○○대, ○○대 안전비철' },
+    { id: 1203, text: '센터상황실 여기 양천열, 1936 초진, 현재까지 인해 열둘' }
+  ]},
+  { id: 13, category: '완진', items: [
+    { id: 1301, text: '센터상황실 여기 양천열, 2033 완진. 인해 열둘이고 출입구 쪽에서 하나아홉된 내용이고 계속 사사 중' }
+  ]},
+  { id: 14, category: '철수단계', items: [
+    { id: 1401, text: '소방력 조정입니다 양천대 제외 비철. (비철시 염화칼슘 살포)' },
+    { id: 1402, text: '다섯 여기 열. 양천6-2 계속 대기할까요?' },
+    { id: 1403, text: '센터상황실 여기 양천열 2010 상황종료 양천열 비철' }
+  ]}
 ];
 
-const UNIT_COLORS = [
-  "#38bdf8","#facc15","#4ade80","#fb923c","#c084fc",
-  "#f472b6","#22d3ee","#a3e635","#f87171","#818cf8",
-  "#34d399","#fbbf24","#60a5fa","#e879f9","#2dd4bf","#f97316"
-];
+let scripts = loadScripts();
+let nextId = 9000;
 
-let units = DEFAULT_UNITS.map((u, i) => ({ ...u, color: UNIT_COLORS[i % UNIT_COLORS.length], custom: false }));
-let placedMap = {}; // { unitName: floorId }
-
-function buildingUnitColorOf(name) {
-  const u = units.find(u => u.name === name);
-  return u ? u.color : "#94a3b8";
+function loadScripts() {
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_SCRIPTS));
 }
-function buildingUnitEmojiOf(name) {
-  const u = units.find(u => u.name === name);
-  return u ? u.emoji : "🚒";
+function saveScripts() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(scripts)); } catch(e) {}
 }
 
-/* 건물 생성 */
-document.getElementById('buildBtn').addEventListener('click', () => {
-  const g = parseInt(document.getElementById('groundFloors').value) || 5;
-  const b = parseInt(document.getElementById('basementFloors').value) || 0;
-  generateBuilding(Math.min(g, 150), Math.min(b, 20));
+function renderRadio() {
+  const body = document.getElementById('radioBody');
+  body.innerHTML = '';
+  scripts.forEach(cat => {
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    block.dataset.catId = cat.id;
+
+    // 헤더
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-header';
+    hdr.innerHTML =
+      '<span class="cat-arrow">▾</span>' +
+      '<span class="cat-title" data-cat-id="' + cat.id + '">' + escHtml(cat.category) + '</span>' +
+      '<button class="cat-add-btn" data-cat-id="' + cat.id + '">＋멘트</button>' +
+      '<button class="cat-edit-btn" data-cat-id="' + cat.id + '" title="카테고리 이름 수정">✏️</button>' +
+      '<button class="cat-del-btn" data-cat-id="' + cat.id + '" title="카테고리 삭제">🗑</button>';
+    hdr.querySelector('.cat-arrow').addEventListener('click', () => block.classList.toggle('collapsed'));
+    hdr.querySelector('.cat-title').addEventListener('click', () => block.classList.toggle('collapsed'));
+    hdr.querySelector('.cat-add-btn').addEventListener('click', e => { e.stopPropagation(); openModal('멘트 추가', '', val => { if (!val.trim()) return; cat.items.push({ id: nextId++, text: val.trim() }); saveScripts(); renderRadio(); }); });
+    hdr.querySelector('.cat-edit-btn').addEventListener('click', e => { e.stopPropagation(); openModal('카테고리 이름 수정', cat.category, val => { if (!val.trim()) return; cat.category = val.trim(); saveScripts(); renderRadio(); }); });
+    hdr.querySelector('.cat-del-btn').addEventListener('click', e => { e.stopPropagation(); if (!confirm('"' + cat.category + '" 카테고리를 삭제할까요?')) return; scripts = scripts.filter(c => c.id !== cat.id); saveScripts(); renderRadio(); });
+    block.appendChild(hdr);
+
+    // 아이템
+    const itemsDiv = document.createElement('div');
+    itemsDiv.className = 'cat-items';
+    cat.items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'script-item';
+      row.dataset.itemId = item.id;
+      row.innerHTML =
+        '<div class="script-text">' + escHtml(item.text) + '</div>' +
+        '<div class="item-btns">' +
+          '<button class="copy-btn">📋 복사</button>' +
+          '<button class="edit-btn">✏️</button>' +
+          '<button class="del-btn">🗑</button>' +
+        '</div>';
+      row.querySelector('.copy-btn').addEventListener('click', () => copyText(item.text));
+      row.querySelector('.edit-btn').addEventListener('click', () => startItemEdit(row, cat, item));
+      row.querySelector('.del-btn').addEventListener('click', () => {
+        cat.items = cat.items.filter(i => i.id !== item.id);
+        saveScripts(); renderRadio();
+      });
+      itemsDiv.appendChild(row);
+    });
+    block.appendChild(itemsDiv);
+    body.appendChild(block);
+  });
+}
+
+function startItemEdit(row, cat, item) {
+  const textDiv = row.querySelector('.script-text');
+  const btnsDiv = row.querySelector('.item-btns');
+  const original = item.text;
+  textDiv.innerHTML =
+    '<textarea class="edit-area">' + escHtml(original) + '</textarea>' +
+    '<div style="margin-top:5px">' +
+    '<button class="edit-save-btn">저장</button>' +
+    '<button class="edit-cancel-btn">취소</button>' +
+    '</div>';
+  btnsDiv.style.display = 'none';
+  textDiv.querySelector('.edit-save-btn').addEventListener('click', () => {
+    const val = textDiv.querySelector('.edit-area').value.trim();
+    if (val) { item.text = val; saveScripts(); }
+    renderRadio();
+  });
+  textDiv.querySelector('.edit-cancel-btn').addEventListener('click', () => renderRadio());
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast()).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast();
+  });
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// 카테고리 추가 버튼
+document.getElementById('addCatBtn').addEventListener('click', () => {
+  openModal('새 카테고리 이름', '', val => {
+    if (!val.trim()) return;
+    scripts.push({ id: nextId++, category: val.trim(), items: [] });
+    saveScripts(); renderRadio();
+  });
 });
 
-function generateBuilding(ground, basement) {
-  // 배치 초기화
-  placedMap = {};
-  renderUnitGrid();
+// 초기화 버튼
+document.getElementById('resetScriptBtn').addEventListener('click', () => {
+  if (!confirm('기본값으로 초기화할까요?\n수정한 내용이 모두 사라집니다.')) return;
+  scripts = JSON.parse(JSON.stringify(DEFAULT_SCRIPTS));
+  saveScripts(); renderRadio();
+});
 
-  const area = document.getElementById('buildingArea');
-  area.innerHTML = '';
-
-  // 옥상
-  area.appendChild(makeFloor('RF', '옥상', 'roof'));
-
-  // 지상층 (위에서 아래로)
-  for (let f = ground; f >= 1; f--) {
-    area.appendChild(makeFloor(`${f}F`, `${f}층`, 'ground'));
-  }
-
-  // 지하층
-  for (let b = 1; b <= basement; b++) {
-    area.appendChild(makeFloor(`B${b}`, `지하${b}`, 'basement'));
-  }
+// 모달
+let modalCallback = null;
+function openModal(title, defaultVal, cb) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-input').value = defaultVal;
+  document.getElementById('modal-overlay').classList.add('open');
+  modalCallback = cb;
+  setTimeout(() => document.getElementById('modal-input').focus(), 100);
 }
+document.getElementById('modal-ok-btn').addEventListener('click', () => {
+  const val = document.getElementById('modal-input').value;
+  document.getElementById('modal-overlay').classList.remove('open');
+  if (modalCallback) { modalCallback(val); modalCallback = null; }
+});
+document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open'); modalCallback = null;
+});
+document.getElementById('modal-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('modal-ok-btn').click(); }
+});
 
-function makeFloor(id, label, type) {
-  const div = document.createElement('div');
-  div.className = `floor-zone ${type}`;
-  div.dataset.floorId = id;
-  div.innerHTML = `
-    <div class="floor-label">${label}</div>
-    <div class="floor-content" id="fc-${id}"></div>
-  `;
-  return div;
-}
+renderRadio();
 
-/* 출동대 패널 렌더 */
+/* ================================================
+   PAGE 3: 소방작전도
+   ================================================ */
+const UNIT_COLORS = ["#38bdf8","#facc15","#4ade80","#fb923c","#c084fc","#f472b6","#22d3ee","#a3e635","#f87171","#818cf8","#34d399","#fbbf24","#60a5fa","#e879f9","#2dd4bf","#f97316"];
+let units = [
+  {name:"양천대",emoji:"🚒"},{name:"신정대",emoji:"🚒"},{name:"신트리대",emoji:"🚒"},
+  {name:"신월대",emoji:"🚒"},{name:"목동대",emoji:"🚒"},{name:"양천구조대",emoji:"🦺"},
+  {name:"강서구조대",emoji:"🦺"},{name:"구로구조대",emoji:"🦺"},{name:"영등포구조대",emoji:"🦺"},
+  {name:"등촌대",emoji:"🚒"},{name:"화곡대",emoji:"🚒"},{name:"당산대",emoji:"🚒"},
+  {name:"신도림대",emoji:"🚒"},{name:"고척대",emoji:"🚒"}
+].map((u,i) => ({...u, color: UNIT_COLORS[i % UNIT_COLORS.length], custom: false}));
+
+let placedMap = {};
+
 function renderUnitGrid() {
-  const grid = document.getElementById('unitGrid');
-  grid.innerHTML = '';
+  const grid = document.getElementById('unitGrid'); grid.innerHTML = '';
   units.forEach(u => {
     const isPlaced = !!placedMap[u.name];
     const div = document.createElement('div');
     div.className = 'unit-icon' + (isPlaced ? ' placed' : '') + (u.custom ? ' custom' : '');
     div.dataset.unitName = u.name;
-    div.innerHTML = `<span class="u-emoji">${u.emoji}</span><span class="u-name">${u.name}</span>`;
     div.style.borderColor = isPlaced ? '#1e293b' : u.color + '66';
-
-    if (!isPlaced) {
-      div.addEventListener('pointerdown', onUnitPointerDown);
-    }
+    div.innerHTML = '<span class="u-emoji">' + u.emoji + '</span><span class="u-name">' + u.name + '</span>';
+    if (!isPlaced) div.addEventListener('pointerdown', onUnitPointerDown);
     grid.appendChild(div);
   });
 }
 
-/* 배치 초기화 버튼 */
+document.getElementById('buildBtn').addEventListener('click', () => {
+  const g = Math.min(parseInt(document.getElementById('groundFloors').value) || 5, 150);
+  const b = Math.min(parseInt(document.getElementById('basementFloors').value) || 0, 20);
+  generateBuilding(g, b);
+});
+
+function generateBuilding(ground, basement) {
+  placedMap = {}; renderUnitGrid();
+  const area = document.getElementById('buildingArea'); area.innerHTML = '';
+  area.appendChild(makeFloor('RF','옥상','roof'));
+  for (let f = ground; f >= 1; f--) area.appendChild(makeFloor(f+'F', f+'층', 'ground'));
+  for (let b = 1; b <= basement; b++) area.appendChild(makeFloor('B'+b, '지하'+b, 'basement'));
+}
+
+function makeFloor(id, label, type) {
+  const div = document.createElement('div');
+  div.className = 'floor-zone ' + type; div.dataset.floorId = id;
+  div.innerHTML = '<div class="floor-label">' + label + '</div><div class="floor-content" id="fc-' + id + '"></div>';
+  return div;
+}
+
 document.getElementById('resetBtn').addEventListener('click', () => {
   placedMap = {};
   document.querySelectorAll('.floor-content').forEach(fc => fc.innerHTML = '');
   renderUnitGrid();
 });
 
-/* 커스텀 출동대 추가 */
 document.getElementById('addUnitBtn').addEventListener('click', addCustomUnit);
 document.getElementById('customUnitInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomUnit(); });
-
 function addCustomUnit() {
-  const input = document.getElementById('customUnitInput');
-  const name = input.value.trim();
-  if (!name) return;
-  if (units.find(u => u.name === name)) { input.value = ''; return; }
-  const color = UNIT_COLORS[units.length % UNIT_COLORS.length];
-  units.push({ name, emoji: '🚒', color, custom: true });
-  input.value = '';
-  renderUnitGrid();
+  const input = document.getElementById('customUnitInput'), name = input.value.trim();
+  if (!name || units.find(u => u.name === name)) { input.value = ''; return; }
+  units.push({ name, emoji:'🚒', color: UNIT_COLORS[units.length % UNIT_COLORS.length], custom: true });
+  input.value = ''; renderUnitGrid();
 }
 
-/* ── 드래그 앤 드롭 (pointer events) ── */
-const ghost = document.getElementById('dragGhost');
-let dragging = null;
-let currentHighlight = null;
+const ghost2 = document.getElementById('dragGhost');
+let dragging = null, currentHL = null;
 
 function onUnitPointerDown(e) {
   if (e.button !== undefined && e.button !== 0) return;
   e.preventDefault();
   const unitName = e.currentTarget.dataset.unitName;
-  const unit = units.find(u => u.name === unitName);
-  if (!unit) return;
-
-  dragging = unit;
-
-  // 고스트 세팅
-  ghost.querySelector('.u-emoji').textContent = unit.emoji;
-  ghost.querySelector('.u-name').textContent = unit.name;
-  ghost.style.display = 'block';
-  moveGhost(e.clientX, e.clientY);
-
-  document.addEventListener('pointermove', onPointerMove);
-  document.addEventListener('pointerup', onPointerUp);
-  document.addEventListener('pointercancel', onPointerUp);
+  dragging = units.find(u => u.name === unitName);
+  if (!dragging) return;
+  ghost2.querySelector('.u-emoji').textContent = dragging.emoji;
+  ghost2.querySelector('.u-name').textContent = dragging.name;
+  ghost2.style.display = 'block';
+  moveGhost2(e.clientX, e.clientY);
+  document.addEventListener('pointermove', onPtrMove);
+  document.addEventListener('pointerup', onPtrUp);
+  document.addEventListener('pointercancel', onPtrUp);
 }
 
-function onPointerMove(e) {
+function onPtrMove(e) {
   if (!dragging) return;
-  moveGhost(e.clientX, e.clientY);
-
-  // 현재 위치의 floor-zone 하이라이트
-  ghost.style.display = 'none';
+  moveGhost2(e.clientX, e.clientY);
+  ghost2.style.display = 'none';
   const el = document.elementFromPoint(e.clientX, e.clientY);
-  ghost.style.display = 'block';
+  ghost2.style.display = 'block';
   const fz = el ? el.closest('.floor-zone') : null;
-
-  if (currentHighlight && currentHighlight !== fz) {
-    currentHighlight.classList.remove('drag-over');
-    currentHighlight = null;
-  }
-  if (fz && fz !== currentHighlight) {
-    fz.classList.add('drag-over');
-    currentHighlight = fz;
-  }
+  if (currentHL && currentHL !== fz) { currentHL.classList.remove('drag-over'); currentHL = null; }
+  if (fz && fz !== currentHL) { fz.classList.add('drag-over'); currentHL = fz; }
 }
 
-function onPointerUp(e) {
-  document.removeEventListener('pointermove', onPointerMove);
-  document.removeEventListener('pointerup', onPointerUp);
-  document.removeEventListener('pointercancel', onPointerUp);
-
-  if (currentHighlight) {
-    currentHighlight.classList.remove('drag-over');
-  }
-  ghost.style.display = 'none';
-
+function onPtrUp(e) {
+  document.removeEventListener('pointermove', onPtrMove);
+  document.removeEventListener('pointerup', onPtrUp);
+  document.removeEventListener('pointercancel', onPtrUp);
+  if (currentHL) { currentHL.classList.remove('drag-over'); currentHL = null; }
+  ghost2.style.display = 'none';
   if (!dragging) return;
-
-  // 드롭 위치 찾기
   const el = document.elementFromPoint(e.clientX, e.clientY);
   const fz = el ? el.closest('.floor-zone') : null;
-
-  if (fz) {
-    const floorId = fz.dataset.floorId;
-    placeUnit(dragging.name, floorId);
-  }
-
-  currentHighlight = null;
+  if (fz) placeUnit(dragging.name, fz.dataset.floorId);
   dragging = null;
 }
 
-function moveGhost(x, y) {
-  ghost.style.left = (x - 38) + 'px';
-  ghost.style.top  = (y - 44) + 'px';
-}
+function moveGhost2(x, y) { ghost2.style.left = (x-38)+'px'; ghost2.style.top = (y-44)+'px'; }
 
 function placeUnit(unitName, floorId) {
-  // 기존 배치 제거
-  if (placedMap[unitName]) {
-    removeChipFromFloor(unitName, placedMap[unitName]);
-  }
-
+  if (placedMap[unitName]) removeChip(unitName, placedMap[unitName]);
   placedMap[unitName] = floorId;
-
-  // 칩 추가
   const fc = document.getElementById('fc-' + floorId);
   if (!fc) return;
-
+  const u = units.find(u => u.name === unitName);
   const chip = document.createElement('div');
-  chip.className = 'placed-chip';
-  chip.dataset.unitName = unitName;
-  const color = buildingUnitColorOf(unitName);
-  const emoji = buildingUnitEmojiOf(unitName);
-  chip.style.background = color;
-  chip.innerHTML = `${emoji} ${unitName} <span class="remove-x">✕</span>`;
-  chip.addEventListener('click', () => {
-    removeUnit(unitName);
-  });
+  chip.className = 'placed-chip'; chip.dataset.unitName = unitName;
+  chip.style.background = u ? u.color : '#94a3b8';
+  chip.innerHTML = (u ? u.emoji : '🚒') + ' ' + unitName + ' <span class="remove-x">✕</span>';
+  chip.addEventListener('click', () => { delete placedMap[unitName]; removeChip(unitName, floorId); renderUnitGrid(); });
   fc.appendChild(chip);
-
   renderUnitGrid();
 }
 
-function removeChipFromFloor(unitName, floorId) {
+function removeChip(unitName, floorId) {
   const fc = document.getElementById('fc-' + floorId);
   if (!fc) return;
-  const chip = fc.querySelector(`[data-unit-name="${unitName}"]`);
+  const chip = fc.querySelector('[data-unit-name="' + unitName + '"]');
   if (chip) chip.remove();
 }
 
-function removeUnit(unitName) {
-  const floorId = placedMap[unitName];
-  if (floorId) removeChipFromFloor(unitName, floorId);
-  delete placedMap[unitName];
-  renderUnitGrid();
-}
-
-/* 초기 렌더 */
 renderUnitGrid();
 
-// 앱 시작 시 지도 바로 초기화 (첫 탭이 출동예측이므로)
-window.addEventListener('load', () => {
-  initKakaoMap();
-  mapInitialized = true;
-});
+window.addEventListener('load', () => { initKakaoMap(); mapInitialized = true; });
 </script>
 </body>
 </html>
