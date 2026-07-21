@@ -199,6 +199,7 @@ html, body { width: 100%; height: 100%; font-family: "Apple SD Gothic Neo", "Pre
 #dragGhost { position: fixed; pointer-events: none; z-index: 9999; background: #1e3a5f; border: 2px solid #38bdf8; border-radius: 9px; padding: 7px 4px; text-align: center; font-size: 10px; font-weight: 700; color: #e2e8f0; width: 75px; opacity: 0.92; display: none; box-shadow: 0 6px 20px rgba(0,0,0,.5); line-height: 1.3; }
 #dragGhost .u-emoji { font-size: 18px; display: block; margin-bottom: 2px; }
 .reset-btn { width: 100%; margin-top: 6px; padding: 7px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #94a3b8; font-size: 12px; cursor: pointer; }
+.script-text.important { color: #f87171; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -400,6 +401,7 @@ async function getRoute(station, fireLat, fireLng) {
     return { success: true, station, coords, totalTime, totalDistance };
   } catch (err) { return { success: false, station, error: err.message }; }
 }
+  
 
 function appendRow(listEl, rank, name, min, km, color, error) {
   const li = document.createElement('li');
@@ -424,6 +426,7 @@ const DEFAULT_SCRIPTS = [
   { id: 2, category: '선착대 지정', items: [
     { id: 201, text: '선착대는 ○○대, ○○대는 신속히 달하나 해서 보이는 상황 속보, 소방력 판단' },
     { id: 202, text: '선착대 ○○대는 비착 즉시 상황판단하고, 화재진압작전 필요 여부 판단. 후착대 임무부여 할 수 있도록' }
+    { id: 203, text: '선착대 ○○대는 비착 즉시 상황속보, 화점층 화재진압. 후착대 임무부여 할 수 있도록' }
   ]},
   { id: 3, category: '임무부여', items: [
     { id: 301, text: '열에서 다시한번 전파 합니다. ○○대는 화점층 진입하여 화재진압, ○○대는 화점층으로 화재진압 및 인명구조, 구조대는 화점층 인명구조' }
@@ -527,13 +530,18 @@ function renderRadio() {
       row.className = 'script-item';
       row.dataset.itemId = item.id;
       row.innerHTML =
-        '<div class="script-text">' + escHtml(item.text) + '</div>' +
+        '<div class="script-text' + (item.important ? ' important' : '') + '">' + escHtml(item.text) + '</div>' +
         '<div class="item-btns">' +
-          '<button class="copy-btn">📋 복사</button>' +
+          '<button class="imp-btn" style="background:' + (item.important ? '#7f1d1d' : '#1e293b') + ';color:' + (item.important ? '#f87171' : '#475569') + ';border:none;border-radius:5px;font-size:11px;padding:4px 7px;cursor:pointer;">🔴</button>' +
+'<button class="copy-btn">📋 복사</button>' +
           '<button class="edit-btn">✏️</button>' +
           '<button class="del-btn">🗑</button>' +
         '</div>';
-      row.querySelector('.copy-btn').addEventListener('click', () => copyText(item.text));
+      row.querySelector('.imp-btn').addEventListener('click', () => {
+  item.important = !item.important;
+  saveScripts(); renderRadio();
+});
+row.querySelector('.copy-btn').addEventListener('click', () => copyText(item.text));
       row.querySelector('.edit-btn').addEventListener('click', () => startItemEdit(row, cat, item));
       row.querySelector('.del-btn').addEventListener('click', () => {
         cat.items = cat.items.filter(i => i.id !== item.id);
