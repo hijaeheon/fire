@@ -321,6 +321,13 @@ function initKakaoMap() {
 
   document.getElementById('addrBtn').addEventListener('click', searchAddress);
   document.getElementById('addrInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchAddress(); });
+
+  // URL 파라미터로 주소를 받으면 자동 검색 (예: ?addr=강서구 가양동 150-11)
+  const paramAddr = new URLSearchParams(window.location.search).get('addr');
+  if (paramAddr) {
+    document.getElementById('addrInput').value = paramAddr;
+    searchAddress();
+  }
   kakao.maps.event.addListener(kakaoMap, 'click', e => {
     runSimulation(e.latLng.getLat(), e.latLng.getLng());
     document.getElementById('addrDropdown').classList.remove('open');
