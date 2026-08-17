@@ -227,6 +227,7 @@ const fireStations = [
   { name: "신트리119안전센터",  lat: 37.51061927, lng: 126.84813039 },
   { name: "목동119안전센터",    lat: 37.54281541, lng: 126.88362649 },
   { name: "신월119안전센터",    lat: 37.5278703,  lng: 126.8330681  },
+  { name: "신월119안전센터",    lat: 37.5279972,  lng: 126.8336861  }, // 맞은편 가상 지점: 실제 소방차는 P턴 불가(U턴만 가능)라 반대편 도로에서 접근하는 경로를 별도 지점으로 계산하기 위함. 결과에서는 더 빠른 쪽 하나만 표시됨.
   { name: "화곡119안전센터",    lat: 37.54361859, lng: 126.8452331  },
   { name: "강서소방서",         lat: 37.5579782,  lng: 126.8602313  },
   { name: "신도림119안전센터",  lat: 37.5072903,  lng: 126.8812306  },
@@ -361,6 +362,21 @@ function initKakaoMap() {
 let fireOverlay = null, routeOverlays = [];
 function clearRoutes() { routeOverlays.forEach(o => { if (o.setMap) o.setMap(null); }); routeOverlays = []; }
 
+// 같은 이름의 대(예: 신월119안전센터 실제/가상 지점)가 여러 개 있을 경우
+// 그 중 가장 빠른(성공한) 결과 하나만 남기고 나머지는 버린다.
+function dedupeByStationName(results) {
+  const bestByName = new Map();
+  results.forEach(r => {
+    const key = r.station.name;
+    const existing = bestByName.get(key);
+    if (!existing) { bestByName.set(key, r); return; }
+    if (r.success && !existing.success) { bestByName.set(key, r); return; }
+    if (!r.success && existing.success) { return; }
+    if (r.success && existing.success && r.totalTime < existing.totalTime) { bestByName.set(key, r); }
+  });
+  return Array.from(bestByName.values());
+}
+
 async function runSimulation(fireLat, fireLng) {
   clearRoutes();
   const statusEl = document.getElementById('status'), listEl = document.getElementById('resultList');
@@ -374,7 +390,10 @@ async function runSimulation(fireLat, fireLng) {
   });
   kakaoMap.panTo(new kakao.maps.LatLng(fireLat, fireLng));
 
-  const results = await Promise.all(fireStations.map(st => getRoute(st, fireLat, fireLng)));
+  const rawResults = await Promise.all(fireStations.map(st => getRoute(st, fireLat, fireLng)));
+
+  // 이름이 같은 대(가상 지점 포함)는 가장 빠른 결과 하나만 사용
+  const results = dedupeByStationName(rawResults);
 
   // 빠른 순 정렬
   results.sort((a, b) => {
