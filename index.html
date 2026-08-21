@@ -260,6 +260,7 @@ const STATION_TO_UNIT = {
 
 const ROUTE_COLORS = ["#f87171","#facc15","#4ade80","#38bdf8","#c084fc","#fb923c","#22d3ee","#a3e635","#f472b6","#818cf8"];
 let lastUnitOrder = [];
+let dispatchedStations = null; // null이면 전체 후보, 배열이면 그 센터명만 계산 (출동지령서 편성 기준 필터)
 
 /* ── 탭 전환 ── */
 let mapInitialized = false, kakaoMap = null;
@@ -325,6 +326,12 @@ function initKakaoMap() {
 
   // URL 파라미터로 주소를 받으면 자동 검색 (예: ?addr=강서구 가양동 150-11)
   const paramAddr = new URLSearchParams(window.location.search).get('addr');
+  // URL 파라미터로 출동편성된 센터 목록을 받으면 시뮬레이션 후보를 그 센터들로만 제한
+  // (예: ?stations=신정119안전센터,양천119안전센터 — 출동 지령 안 된 센터는 계산/표시에서 제외됨)
+  const paramStations = new URLSearchParams(window.location.search).get('stations');
+  if (paramStations) {
+    dispatchedStations = paramStations.split(',').map(s => s.trim()).filter(Boolean);
+  }
   if (paramAddr) {
     document.getElementById('addrInput').value = paramAddr;
     searchAddress();
@@ -390,7 +397,15 @@ async function runSimulation(fireLat, fireLng) {
   });
   kakaoMap.panTo(new kakao.maps.LatLng(fireLat, fireLng));
 
-  const rawResults = await Promise.all(fireStations.map(st => getRoute(st, fireLat, fireLng)));
+  // 출동편성 목록이 있으면 그 센터들만 후보로 사용 (매칭되는 게 하나도 없으면 안전하게 전체로 폴백)
+  let candidateStations = fireStations;
+  let filteredMode = false;
+  if (dispatchedStations && dispatchedStations.length) {
+    const filtered = fireStations.filter(st => dispatchedStations.indexOf(st.name) > -1);
+    if (filtered.length > 0) { candidateStations = filtered; filteredMode = true; }
+  }
+
+  const rawResults = await Promise.all(candidateStations.map(st => getRoute(st, fireLat, fireLng)));
 
   // 이름이 같은 대(가상 지점 포함)는 가장 빠른 결과 하나만 사용
   const results = dedupeByStationName(rawResults);
@@ -431,7 +446,7 @@ async function runSimulation(fireLat, fireLng) {
     appendRow(listEl, rank, r.station.name, min, km, color, isFirst);
   });
 
-  statusEl.textContent = lastUnitOrder.length ? '🚨 선착대: ' + lastUnitOrder[0] : '완료';
+  statusEl.textContent = lastUnitOrder.length ? '🚨 선착대: ' + lastUnitOrder[0] + (filteredMode ? ' (출동편성 기준)' : '') : '완료';
 }
 
 async function getRoute(station, fireLat, fireLng) {
