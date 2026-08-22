@@ -329,7 +329,7 @@ function initKakaoMap() {
   // URL 파라미터로 출동편성된 센터 목록을 받으면 시뮬레이션 후보를 그 센터들로만 제한
   // (예: ?stations=신정119안전센터,양천119안전센터 — 출동 지령 안 된 센터는 계산/표시에서 제외됨)
   const paramStations = new URLSearchParams(window.location.search).get('stations');
-  if (paramStations) {
+  if (paramStations !== null) {
     dispatchedStations = paramStations.split(',').map(s => s.trim()).filter(Boolean);
   }
   if (paramAddr) {
@@ -397,12 +397,36 @@ async function runSimulation(fireLat, fireLng) {
   });
   kakaoMap.panTo(new kakao.maps.LatLng(fireLat, fireLng));
 
-  // 출동편성 목록이 있으면 그 센터들만 후보로 사용 (매칭되는 게 하나도 없으면 안전하게 전체로 폴백)
+  // 출동편성 목록 파라미터가 있으면 그 센터들만 후보로 사용.
+  // 파라미터가 있는데 목록이 비어있으면(=펌프차 0대 편성) "출동편성 없음"으로 명확히 표시하고 계산 자체를 생략함.
+  // 파라미터 자체가 없으면(북마클릿 없이 직접 연 경우 등) 기존처럼 전체 센터 대상으로 계산함.
   let candidateStations = fireStations;
   let filteredMode = false;
-  if (dispatchedStations && dispatchedStations.length) {
-    const filtered = fireStations.filter(st => dispatchedStations.indexOf(st.name) > -1);
-    if (filtered.length > 0) { candidateStations = filtered; filteredMode = true; }
+  let noDispatchedPump = false;
+  if (dispatchedStations !== null) {
+    filteredMode = true;
+    if (dispatchedStations.length === 0) {
+      noDispatchedPump = true;
+      candidateStations = [];
+    } else {
+      const filtered = fireStations.filter(st => dispatchedStations.indexOf(st.name) > -1);
+      if (filtered.length > 0) {
+        candidateStations = filtered;
+      } else {
+        // 이름이 하나도 안 맞으면(매칭 오류 가능성) 안전하게 전체로 폴백
+        candidateStations = fireStations;
+        filteredMode = false;
+      }
+    }
+  }
+
+  if (noDispatchedPump) {
+    statusEl.textContent = '⚠️ 출동편성된 펌프차가 없습니다';
+    const li = document.createElement('li');
+    li.className = 'error';
+    li.textContent = '이 지령에는 편성된 펌프차가 없습니다 (지도/경로 계산 생략됨)';
+    listEl.appendChild(li);
+    return;
   }
 
   const rawResults = await Promise.all(candidateStations.map(st => getRoute(st, fireLat, fireLng)));
